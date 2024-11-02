@@ -1,0 +1,292 @@
+# Magentic-UI
+
+![Magentic-UI](./docs/magenticui.png)
+
+Magentic-UI is a multiagent system consisting of 5 agents - an Orchestrator that coordinates a team of 4 specialized agents:
+
+- **WebSurfer**: Navigates the web, retrieves information, and interacts with websites
+- **Coder**: Writes and executes code to solve programming tasks
+- **FileSurfer**: Handles file operations like reading, writing, and navigating documents
+- **UserProxy**: Interfaces with the human user, collecting feedback and approvals
+
+Magentic-UI provides a web interface for users to interact with the system, submit tasks, and monitor progress.
+
+## Process Flow
+
+1. **Task Input**: The user submits a task that requires multiple steps to complete.
+
+2. **Planning Phase**:
+
+   - The Orchestrator generates a step-by-step plan or retrieves a similar plan from memory
+   - With co-planning enabled, the user can review, modify, and approve the plan before execution begins
+   - Each plan step specifies which specialized agent will perform the action
+
+3. **Execution Phase**:
+
+   - **Step Execution**:
+
+     - The Orchestrator manages step-by-step execution of the approved plan
+     - For each step, the system evaluates if the current step is complete
+     - The system selects the next agent to act and provides instructions
+     - The ApprovalGuard intercepts potentially sensitive actions (file modifications, code execution, website navigation) and may request explicit user approval
+     - The selected agent performs its action and returns a response
+
+   - **Dynamic Replanning**:
+
+     - If progress stalls, the Orchestrator can trigger replanning
+     - Previously completed steps are preserved
+     - A new plan for remaining tasks is generated
+     - With co-planning enabled, the user can review and approve the new plan
+
+   - **Task Completion**:
+     - Once all steps are executed, the Orchestrator synthesizes a final answer
+     - The system can optionally allow for follow-up questions or new tasks
+
+Throughout this process, the user can provide feedback during both planning and execution, making this a truly collaborative system for complex task completion.
+
+
+## Prerequisites
+
+1. Magentic-UI requires Docker as part of normal operation. If running on Windows or Mac, you can use [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
+2. Running Magentic-UI on Windows requires WSL2. You can follow the instructions [here](https://docs.microsoft.com/en-us/windows/wsl/install) to install WSL2. Additionally, be sure that Docker Desktop is configured to use WSL2 (Settings > Resources > WSL Integration). You can find more detailed instructions about this step [here](https://docs.microsoft.com/en-us/windows/wsl/tutorials/wsl-containers).
+
+3. Provide your OpenAI API key to Magentic-UI by setting the environmental variable `OPENAI_API_KEY`. Alternatively, review the [Custom Client Configuration](#custom-client-configuration) section below.
+
+
+## PyPI Installation 
+
+Magentic-UI is available on PyPI. We recommend using a virtual environment to avoid conflicts with other packages.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install magentic-ui
+```
+
+Alternatively, if you use `uv` for dependency management, you can install Magentic-UI with:
+
+```bash
+uv venv --python=3.12 .venv
+. .venv/bin/activate
+uv pip install magentic-ui
+```
+
+## Running Magentic-UI
+
+To run Magentic-UI, make sure that Docker is running, then run the following command:
+
+```bash
+magentic ui --port 8081
+```
+
+The first time that you run this command, it will take a while to build the Docker images -- go grab a coffee or something. The next time you run it, it will be much faster.
+
+Once the server is running, you can access the UI at <http://localhost:8081>.
+
+## Custom Client Configuration
+
+If you want to use a different OpenAI key, or if you want to configure use with Azure OpenAI, you can do so by creating a `config.yaml` file in the `appdir` folder (typically `~/.magentic_ui`).
+
+An example `config.yaml` for OpenAI is given below:
+
+```yaml
+# config.yaml
+
+######################################
+# Default OpenAI model configuration #
+######################################
+model_config: &client
+  provider: autogen_ext.models.openai.OpenAIChatCompletionClient
+  config:
+    model: gpt-4o
+    api_key: <YOUR API KEY>
+    max_retries: 10
+
+##########################
+# Clients for each agent #
+##########################
+orchestrator_client: *client
+coder_client: *client
+web_surfer_client: *client
+file_surfer_client: *client
+action_guard_client: *client
+user_proxy_client: *client
+```
+
+The corresponding configuration for Azure OpenAI is:
+
+```yaml
+# config.yaml
+
+######################################
+# Azure model configuration          #
+######################################
+model_config: &client
+  provider: AzureOpenAIChatCompletionClient
+  config:
+    model: gpt-4o
+    azure_endpoint: "<YOUR ENDPOINT>"
+    azure_deployment: "<YOUR DEPLOYMENT>"
+    api_version: "2024-10-21"
+    azure_ad_token_provider:
+      provider: autogen_ext.auth.azure.AzureTokenProvider
+      config:
+        provider_kind: DefaultAzureCredential
+        scopes:
+          - https://cognitiveservices.azure.com/.default
+    max_retries: 10
+
+
+##########################
+# Clients for each agent #
+##########################
+orchestrator_client: *client
+coder_client: *client
+web_surfer_client: *client
+file_surfer_client: *client
+action_guard_client: *client
+user_proxy_client: *client
+```
+
+
+## Building Magentic-UI from source
+
+### 1. Make sure the above prerequisites are installed, and that Docker is running.
+
+### 2. Clone the repository to your local machine:
+
+```bash
+git clone https://github.com/microsoft/magentic-ui.git
+cd magentic-ui
+```
+
+or, if using SSH:
+
+```bash
+git clone git@github.com:microsoft/magentic-ui.git
+cd magentic-ui
+```
+
+### 3. Install Magentic-UI's dependencies with uv:
+
+   ```bash
+   # install uv through https://docs.astral.sh/uv/getting-started/installation/
+   uv sync --all-extras
+   source .venv/bin/activate
+   ```
+
+### 4. Build the frontend:
+
+First make sure to have install node:
+
+```bash
+# install nvm to install node
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+nvm install node
+```
+
+Then install the frontend:
+
+```bash
+cd frontend
+npm install -g gatsby-cli
+npm install --global yarn
+yarn install
+yarn build
+cd ..
+```
+
+### 5. Run Magentic-UI, as usual.
+
+```bash
+magentic ui --port 8081
+```
+
+For hosting the Magentic-UI, run the command:
+
+```bash
+magentic ui --port 8081 --host 0.0.0.0
+```
+
+### Running the UI from source
+
+If you are working on the UI, you can run the frontend in development mode so that it will automatically update when you make changes.
+
+1. Open a separate terminal and change directory to the frontend
+
+```bash
+cd frontend
+```
+
+3. Create a `.env.development` file.
+
+```bash
+cp .env.default .env.development
+```
+
+3. Launch frontend server
+
+```bash
+npm run start
+```
+
+Then run the UI:
+
+```bash
+magentic ui --outside-docker --port 8081
+```
+
+The frontend from source will be available at <http://localhost:8000>, and the compiled frontend will be available at <http://localhost:8081>.
+
+## Running the web surfer container directly
+
+First, ensure it is built:
+
+```bash
+./docker/prepare.sh
+```
+
+Run it:
+
+```bash
+docker run --rm \
+    -p 9000:9000 \
+    -p 9001:9001 \
+    -v $(pwd):/workspace \
+    -e PLAYWRIGHT_WS_PATH=/ws \
+    -e PLAYWRIGHT_PORT=9000 \
+    -e NO_VNC_PORT=9001 \
+    magentic-ui-vnc-browser:latest
+```
+
+Open a browser and navigate to <http://localhost:9001/vnc.html> to access the VNC viewer.
+
+You'll see a black screen. The browser only launched when needed, so lets run a script to open a page.
+
+```python
+from playwright.sync_api import sync_playwright
+import time
+
+with sync_playwright() as p:
+    browser = p.chromium.connect("ws://localhost:9000/ws")
+    page = browser.new_page()
+    page.goto("https://www.microsoft.com/en-us/research/lab/ai-frontiers/")
+    time.sleep(60)
+```
+
+## Legal Notices
+
+Microsoft, and any contributors, grant you a license to any code in the repository under the [MIT License](https://opensource.org/licenses/MIT). See the [LICENSE](LICENSE) file.
+
+Microsoft, Windows, Microsoft Azure, and/or other Microsoft products and services referenced in the documentation
+may be either trademarks or registered trademarks of Microsoft in the United States and/or other countries.
+The licenses for this project do not grant you rights to use any Microsoft names, logos, or trademarks.
+Microsoft's general trademark guidelines can be found at <http://go.microsoft.com/fwlink/?LinkID=254653>.
+
+Any use of third-party trademarks or logos are subject to those third-party's policies.
+
+Privacy information can be found at <https://go.microsoft.com/fwlink/?LinkId=521839>
+
+Microsoft and any contributors reserve all other rights, whether under their respective copyrights, patents,
+or trademarks, whether by implication, estoppel, or otherwise.
