@@ -170,11 +170,12 @@ cd magentic-ui
 
 ### 3. Install Magentic-UI's dependencies with uv:
 
-   ```bash
-   # install uv through https://docs.astral.sh/uv/getting-started/installation/
-   uv sync --all-extras
-   source .venv/bin/activate
-   ```
+```bash
+# install uv through https://docs.astral.sh/uv/getting-started/installation/
+uv venv --python=3.12 .venv
+uv sync --all-extras
+source .venv/bin/activate
+```
 
 ### 4. Build the frontend:
 
@@ -234,17 +235,18 @@ npm run start
 Then run the UI:
 
 ```bash
-magentic ui --outside-docker --port 8081
+magentic ui --port 8081
 ```
 
 The frontend from source will be available at <http://localhost:8000>, and the compiled frontend will be available at <http://localhost:8081>.
 
 ## Running the web surfer container directly
 
-First, ensure it is built:
+First, ensure it is built. Youc an do this by running Magentic UI once beforehand, or by running the following commands:
 
 ```bash
-./docker/prepare.sh
+cd src/magentic_ui/docker/magentic-ui-browser-docker
+docker build -t magentic-ui-vnc-browser:latest .
 ```
 
 Run it:
@@ -273,6 +275,44 @@ with sync_playwright() as p:
     page = browser.new_page()
     page.goto("https://www.microsoft.com/en-us/research/lab/ai-frontiers/")
     time.sleep(60)
+```
+
+
+## Contributing
+
+This project welcomes contributions and suggestions. Most contributions require you to agree to a
+Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
+the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+
+When you submit a pull request, a CLA bot will automatically determine whether you need to provide
+a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
+provided by the bot. You will only need to do this once across all repos using our CLA.
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
+contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+### How to Contribute
+
+You can help by looking at issues or helping review PRs. Any issue or PR is welcome, but we have also marked some as 'open for contribution' and 'open for reviewing' to help facilitate community contributions. These are ofcourse just suggestions and you are welcome to contribute in any way you like.
+
+<div align="center">
+
+|            | All                                                          | Especially Needs Help from Community                                                                                                      |
+| ---------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Issues** | [All Issues](https://github.com/microsoft/magentic-ui/issues) | [Issues open for contribution](https://github.com/microsoft/magentic-ui/issues?q=is%3Aissue+is%3Aopen+label%3A%22open+for+contribution%22) |
+| **PRs**    | [All PRs](https://github.com/microsoft/magentic-ui/pulls)     | [PRs open for reviewing](https://github.com/microsoft/magentic-ui/pulls?q=is%3Apr+is%3Aopen+label%3A%22open+for+reviewing%22)              |
+
+</div>
+
+Please note that all PRs contributing new features are expected to include new tests. You can find existing tests in the `tests` directory.
+
+### Running Tests and Checks
+
+All contributions must pass the continuous integration checks. You can run these checks locally before submitting a PR by running:
+
+```sh
+poe check
 ```
 
 ## Legal Notices
