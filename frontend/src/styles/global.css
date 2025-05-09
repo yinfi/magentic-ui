@@ -330,10 +330,7 @@ a:hover {
 .ant-modal-close {
   @apply text-primary   duration-200   !important;
 }
-.ant-modal-title,
-.ant-modal-header {
-  @apply bg-primary text-primary !important;
-}
+
 .ant-radio,
 .ant-collapse,
 .ant-collapse-header-text,

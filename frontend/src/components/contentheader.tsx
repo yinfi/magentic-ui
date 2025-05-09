@@ -6,6 +6,7 @@ import { useConfigStore } from "../hooks/store";
 import { Settings } from "lucide-react";
 import SignInModal from "./signin";
 import SettingsMenu from "./settings";
+import logo from "../assets/logo.svg";
 
 type ContentHeaderProps = {
   onMobileMenuToggle: () => void;
@@ -57,7 +58,10 @@ const ContentHeader = ({
               </Tooltip>
             )}
           </div>
-          <div className={`text-primary text-2xl font-bold`}>Magentic-UI</div>
+          <div className="flex items-center space-x-2">
+            <img src={logo} alt="Magentic-UI Logo" className="h-10 w-10" />
+            <div className="text-primary text-2xl font-bold">Magentic-UI</div>
+          </div>
         </div>
 
         {/* User Profile and Settings */}

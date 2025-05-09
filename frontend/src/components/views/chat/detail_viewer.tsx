@@ -302,7 +302,6 @@ const DetailViewer: React.FC<DetailViewerProps> = ({
       <BrowserModal
         isOpen={isModalOpen}
         onClose={() => {
-          console.log("====modal close called");
           setIsModalOpen(false);
         }}
         novncPort={novncPort}
