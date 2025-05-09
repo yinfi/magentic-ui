@@ -18,12 +18,8 @@ classifiers = [
 dependencies = [
     "autogen-agentchat==0.5.3",
     "autogen-core==0.5.3",
-    "autogen-ext[azure,docker,ollama,openai,file-surfer,web-surfer,magentic-one,task-centric-memory]==0.5.3",
+    "autogen-ext[openai,docker,file-surfer,web-surfer,magentic-one,task-centric-memory]==0.5.3",
     "aioconsole",
-    "huggingface_hub",
-    "tabulate",
-    "pandas",
-    "scipy",
     "nest_asyncio",
     "docker",
     "aiohttp",
@@ -43,8 +39,22 @@ dependencies = [
     "alembic",
     "pyyaml",
     "html2text",
-    "azure-identity",
     "psutil",
+]
+
+[project.optional-dependencies]
+eval = [
+    "huggingface_hub",
+    "pandas",
+    "scipy",
+]
+
+azure = [
+    "autogen-ext[azure]==0.5.3"
+]
+
+ollama = [
+    "autogen-ext[ollama]==0.5.3"
 ]
 
 [project.scripts]
