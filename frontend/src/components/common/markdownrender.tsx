@@ -46,12 +46,19 @@ const CodeBlock: React.FC<{ language: string; value: string }> = ({
   value,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(value);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  // Split code into lines
+  const lines = value.split("\n");
+  const isLong = lines.length > 20;
+  const displayedValue =
+    !expanded && isLong ? lines.slice(0, 20).join("\n") : value;
 
   return (
     <div style={{ position: "relative", marginBottom: "1rem" }}>
@@ -106,8 +113,32 @@ const CodeBlock: React.FC<{ language: string; value: string }> = ({
             padding: "1rem",
           }}
         >
-          {value}
+          {displayedValue}
         </SyntaxHighlighter>
+        {isLong && (
+          <div style={{ textAlign: "center", marginTop: "0.5rem" }}>
+            <button
+              onClick={() => setExpanded((prev) => !prev)}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "var(--color-text-secondary)",
+                cursor: "pointer",
+                padding: "0.25rem 0.5rem",
+                fontSize: "0.9rem",
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = "var(--color-text-primary)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = "var(--color-text-secondary)")
+              }
+            >
+              {expanded ? "Show less" : `Show ${lines.length - 20} more lines`}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
