@@ -1,6 +1,9 @@
 # Magentic-UI
 
-![Magentic-UI](./docs/magenticui.png)
+<!-- ![Magentic-UI](./docs/magenticui.png) -->
+<p align="center">
+  <img src="./docs/magenticui.png" alt="Magentic-UI" height="400">
+</p>
 
 Magentic-UI is a multiagent system consisting of 5 agents - an Orchestrator that coordinates a team of 4 specialized agents:
 
