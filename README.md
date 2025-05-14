@@ -1,11 +1,30 @@
+<div align="center">
+
+<img src="frontend/src/assets/logo.svg" alt="Magentic-UI Logo" height="100">
+
 # Magentic-UI
+_Complete complex web tasks by combining real-time browser automation with transparent, human-in-the-loop control._
 
-<!-- ![Magentic-UI](./docs/magenticui.png) -->
-<p align="center">
-  <img src="./docs/magenticui.png" alt="Magentic-UI" height="400">
-</p>
+</div>
 
-Magentic-UI is a multiagent system consisting of 5 agents - an Orchestrator that coordinates a team of 4 specialized agents:
+<img src="./docs/landing.gif" loop=infinite>
+
+Magentic-UI is a multi-agent system for automating complex web tasks. An Orchestrator coordinates four agents—WebSurfer, Coder, FileSurfer, and UserProxy—to handle browsing, coding, file management, and user feedback, all through a collaborative web interface. Here's how you can get started with Magentic-UI.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install magentic-ui
+# export OPENAI_API_KEY=<YOUR API KEY>
+magentic ui --port 8081
+```
+
+
+
+
+## About Magentic-UI
+
+Magentic-UI is a multi-agent system consisting of 5 agents - an Orchestrator that coordinates a team of 4 specialized agents:
 
 - **WebSurfer**: Navigates the web, retrieves information, and interacts with websites
 - **Coder**: Writes and executes code to solve programming tasks
@@ -14,7 +33,13 @@ Magentic-UI is a multiagent system consisting of 5 agents - an Orchestrator that
 
 Magentic-UI provides a web interface for users to interact with the system, submit tasks, and monitor progress.
 
-## Process Flow
+## How does it work?
+
+<p align="center">
+  <img src="./docs/magenticui.png" alt="Magentic-UI" height="400">
+</p>
+
+
 
 1. **Task Input**: The user submits a task that requires multiple steps to complete.
 
