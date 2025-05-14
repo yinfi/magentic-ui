@@ -77,7 +77,7 @@ class PlaywrightController:
         downloads_folder (str, optional): The folder to save downloads to. If None, downloads are not saved. Default: None
         animate_actions (bool, optional): Whether to animate the actions (create fake cursor to click). Default: False
         viewport_width (int, optional): The width of the viewport. Default: 1440
-        viewport_height (int, optional): The height of the viewport. Default: 900
+        viewport_height (int, optional): The height of the viewport. Default: 1440
         _download_handler (callable, None], optional): A function to handle downloads.
         to_resize_viewport (bool, optional): Whether to resize the viewport. Default: True
         timeout_load (int | float, optional): Amount of time (in secs) to wait before timeout on actions. Default: 1
@@ -92,7 +92,7 @@ class PlaywrightController:
         downloads_folder: str | None = None,
         animate_actions: bool = False,
         viewport_width: int = 1440,
-        viewport_height: int = 900,
+        viewport_height: int = 1440,
         _download_handler: Optional[Callable[[Download], None]] = None,
         to_resize_viewport: bool = True,
         timeout_load: Union[int, float] = 1,
@@ -956,18 +956,18 @@ class PlaywrightController:
                     (identifier) => {
                         const element = document.querySelector(`[__elementId='${identifier}']`);
                         if (!element) throw new Error('Element not found');
-                        
+
                         // Dispatch multiple events to ensure the selection is registered
                         const events = ['mousedown', 'mouseup', 'click', 'change'];
                         events.forEach(eventType => {
                             element.dispatchEvent(new Event(eventType, { bubbles: true }));
                         });
-                        
+
                         // If element has aria-selected, set it
                         if (element.hasAttribute('aria-selected')) {
                             element.setAttribute('aria-selected', 'true');
                         }
-                        
+
                         // If element has a data-value, try to set it on the parent
                         const value = element.getAttribute('data-value');
                         if (value) {
