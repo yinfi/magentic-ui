@@ -3,7 +3,7 @@
 <img src="frontend/src/assets/logo.svg" alt="Magentic-UI Logo" height="100">
 
 # Magentic-UI
-_Complete complex web tasks by combining real-time browser automation with transparent, human-in-the-loop control._
+_Automate your web tasks while you stay in control_
 
 </div>
 
