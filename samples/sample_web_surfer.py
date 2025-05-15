@@ -30,7 +30,17 @@ async def main() -> None:
     and runs the conversation.
     """
     parser = argparse.ArgumentParser(
-        description="Run WebSurfer with docker browser on configurable port"
+        description="""
+        Run WebSurfer with a Docker-based or local browser, supporting both headless and VNC (noVNC) modes.
+        
+        - By default, runs with a local Playwright browser.
+        - Use --port to specify a port for a Dockerized Playwright browser (headless or with VNC).
+        - Use --novnc-port to enable a noVNC web interface for browser interaction via your web browser.
+        
+        To view the browser via noVNC, open your web browser and navigate to:
+            http://localhost:<novnc-port>/?autoconnect=1
+        Replace <novnc-port> with the value you provide to --novnc-port (e.g., 6080).
+        """
     )
     parser.add_argument(
         "--port",
@@ -42,7 +52,11 @@ async def main() -> None:
         "--novnc-port",
         type=int,
         default=-1,
-        help="Port to run the noVNC server on (default: 6080)",
+        help="""
+        Port to run the noVNC server on (default: 6080). 
+        If set, you can view and interact with the browser remotely by visiting 
+        http://localhost:<novnc-port>/?autoconnect=1 in your web browser.
+        """,
     )
     args = parser.parse_args()
 
@@ -76,9 +90,6 @@ async def main() -> None:
         debug_dir="debug",
         to_save_screenshots=False,
         browser=browser,
-        # start_page="https://www.file.io/",
-        # start_page="https://docs.google.com/forms/d/e/1FAIpQLSefSki_8uQgplvB61r2OecNnYcDst_1sfYxdOxU-e65vHVwXQ/viewform?usp=header",
-        # start_page="https://www.cargurus.com",
         multiple_tools_per_call=False,
         json_model_output=False,
         use_action_guard=False,

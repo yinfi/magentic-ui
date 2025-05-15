@@ -517,7 +517,7 @@ class Orchestrator(BaseGroupChatManager):
                 query,
                 max_pages=3,
                 max_tokens_per_page=5000,
-                timeout_seconds=20,
+                timeout_seconds=35,
             )
             if bing_search_results.combined_content != "":
                 bing_results_progress = f"Reading through {len(bing_search_results.page_contents)} web pages..."

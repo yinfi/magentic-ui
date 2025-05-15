@@ -153,7 +153,6 @@ coder_client: *client
 web_surfer_client: *client
 file_surfer_client: *client
 action_guard_client: *client
-user_proxy_client: *client
 ```
 
 The corresponding configuration for Azure OpenAI is:
@@ -188,7 +187,6 @@ coder_client: *client
 web_surfer_client: *client
 file_surfer_client: *client
 action_guard_client: *client
-user_proxy_client: *client
 ```
 
 
@@ -246,11 +244,6 @@ cd ..
 magentic ui --port 8081
 ```
 
-For hosting the Magentic-UI, run the command:
-
-```bash
-magentic ui --port 8081 --host 0.0.0.0
-```
 
 #### Running the UI from source
 
@@ -281,44 +274,6 @@ magentic ui --port 8081
 ```
 
 The frontend from source will be available at <http://localhost:8000>, and the compiled frontend will be available at <http://localhost:8081>.
-
-### Running the web surfer container directly
-
-First, ensure it is built. Youc an do this by running Magentic UI once beforehand, or by running the following commands:
-
-```bash
-cd src/magentic_ui/docker/magentic-ui-browser-docker
-docker build -t magentic-ui-vnc-browser:latest .
-```
-
-Run it:
-
-```bash
-docker run --rm \
-    -p 9000:9000 \
-    -p 9001:9001 \
-    -v $(pwd):/workspace \
-    -e PLAYWRIGHT_WS_PATH=/ws \
-    -e PLAYWRIGHT_PORT=9000 \
-    -e NO_VNC_PORT=9001 \
-    magentic-ui-vnc-browser:latest
-```
-
-Open a browser and navigate to <http://localhost:9001/vnc.html> to access the VNC viewer.
-
-You'll see a black screen. The browser only launched when needed, so lets run a script to open a page.
-
-```python
-from playwright.sync_api import sync_playwright
-import time
-
-with sync_playwright() as p:
-    browser = p.chromium.connect("ws://localhost:9000/ws")
-    page = browser.new_page()
-    page.goto("https://www.microsoft.com/en-us/research/lab/ai-frontiers/")
-    time.sleep(60)
-```
-
 
 ## Contributing
 

@@ -16,9 +16,9 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "autogen-agentchat==0.5.3",
-    "autogen-core==0.5.3",
-    "autogen-ext[openai,docker,file-surfer,web-surfer,magentic-one,task-centric-memory]==0.5.3",
+    "autogen-agentchat==0.5.7",
+    "autogen-core==0.5.7",
+    "autogen-ext[openai,docker,file-surfer,web-surfer,magentic-one,task-centric-memory]==0.5.7",
     "aioconsole",
     "nest_asyncio",
     "docker",
@@ -50,11 +50,11 @@ eval = [
 ]
 
 azure = [
-    "autogen-ext[azure]==0.5.3"
+    "autogen-ext[azure]==0.5.7"
 ]
 
 ollama = [
-    "autogen-ext[ollama]==0.5.3"
+    "autogen-ext[ollama]==0.5.7"
 ]
 
 [project.scripts]

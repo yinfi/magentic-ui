@@ -43,6 +43,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ isOpen, onClose }) => {
   const [allowedlistEnabled, setAllowedlistEnabled] = React.useState(false);
 
   const MODEL_OPTIONS = [
+    { value: "azure-ai-foundry", label: "Azure AI Foundry Template" },
     { value: "gpt-4o-2024-08-06", label: "GPT-4o" },
     { value: "gpt-4o-mini-2024-07-18", label: "GPT-4o Mini" },
     { value: "gpt-4.1-2025-04-14", label: "GPT-4.1" },
@@ -52,6 +53,28 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ isOpen, onClose }) => {
     { value: "o3-mini-2025-01-31", label: "O3 Mini" },
     { value: "o1-2024-12-17", label: "O1" },
   ];
+
+  const AZURE_AI_FOUNDRY_YAML = `model_config: &client
+  provider: AzureOpenAIChatCompletionClient
+  config:
+    model: gpt-4o
+    azure_endpoint: "<YOUR ENDPOINT>"
+    azure_deployment: "<YOUR DEPLOYMENT>"
+    api_version: "2024-10-21"
+    azure_ad_token_provider:
+      provider: autogen_ext.auth.azure.AzureTokenProvider
+      config:
+        provider_kind: DefaultAzureCredential
+        scopes:
+          - https://cognitiveservices.azure.com/.default
+    max_retries: 10
+
+orchestrator_client: *client
+coder_client: *client
+web_surfer_client: *client
+file_surfer_client: *client
+action_guard_client: *client
+`;
 
   React.useEffect(() => {
     if (isOpen) {
@@ -177,6 +200,11 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ isOpen, onClose }) => {
 
   const updateModelInConfig = (modelName: string) => {
     try {
+      if (modelName === "azure-ai-foundry") {
+        handleUpdateConfig({ model_configs: AZURE_AI_FOUNDRY_YAML });
+        message.success("Azure AI Foundry configuration applied");
+        return;
+      }
       const yamlLines = config.model_configs?.split("\n") || [];
       const updatedLines = yamlLines.map((line: string) => {
         if (line.includes("model:")) {
@@ -378,12 +406,12 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ isOpen, onClose }) => {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
+                      {/* <span className="flex items-center gap-2">
                         Use Bing Search for Planning
                         <Tooltip title="When enabled, Magentic-UI will use Bing Search when coming up with a plan. Note this adds 10 seconds to the planning time.">
                           <InfoCircleOutlined className="text-secondary hover:text-primary cursor-help" />
                         </Tooltip>
-                      </span>
+                      </span> */}
                       <Switch
                         checked={config.do_bing_search}
                         checkedChildren="ON"
