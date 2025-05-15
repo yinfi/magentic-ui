@@ -40,16 +40,13 @@ magentic ui --port 8081
 
 ## Table of Contents
 
-| Section | Description |
-|---------|-------------|
-| [About Magentic-UI](#about-magentic-ui) | System overview and agent roles |
-| [How does it work?](#how-does-it-work) | Step-by-step workflow |
-| [How to Use](#how-to-use-magentic-ui) | Prerequisites and usage |
-| [Custom Client Configuration](#custom-client-configuration) | OpenAI/Azure config setup |
-| [Building from Source](#building-magentic-ui-from-source) | Developer instructions |
-| [Contributing](#contributing) | How to help and contribute |
-| [Legal Notices](#legal-notices) | Licensing and legal info |
-
+- [About Magentic-UI](#about-magentic-ui)
+- [How does it work?](#how-does-it-work)
+- [How to use?](#how-to-use-magentic-ui)
+- [How to use custom clients?](#custom-client-configuration)
+- [How to build from source?](#building-magentic-ui-from-source)
+- [Contributing](#contributing)
+- [Legal Notices](#legal-notices)
 
 
 ## About Magentic-UI
