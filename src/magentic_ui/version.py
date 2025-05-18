@@ -1,3 +1,3 @@
-VERSION = "0.0.2rc1"
+VERSION = "0.0.2"
 __version__ = VERSION
 APP_NAME = "Magentic-UI"
