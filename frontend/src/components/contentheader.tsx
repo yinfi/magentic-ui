@@ -1,12 +1,13 @@
 import React from "react";
 import { PanelLeftClose, PanelLeftOpen, Plus } from "lucide-react";
-import { Tooltip, Button } from "antd";
+import { Tooltip } from "antd";
 import { appContext } from "../hooks/provider";
 import { useConfigStore } from "../hooks/store";
 import { Settings } from "lucide-react";
 import SignInModal from "./signin";
 import SettingsMenu from "./settings";
 import logo from "../assets/logo.svg";
+import { Button } from "./common/Button";
 
 type ContentHeaderProps = {
   onMobileMenuToggle: () => void;
@@ -33,16 +34,19 @@ const ContentHeader = ({
         <div className="flex items-center">
           {/* Sidebar Toggle */}
           <Tooltip title={isSidebarOpen ? "Close Sidebar" : "Open Sidebar"}>
-            <button
+            <Button
+              variant="tertiary"
+              size="sm"
+              icon={
+                isSidebarOpen ? (
+                  <PanelLeftClose strokeWidth={1.5} className="h-6 w-6" />
+                ) : (
+                  <PanelLeftOpen strokeWidth={1.5} className="h-6 w-6" />
+                )
+              }
               onClick={onToggleSidebar}
-              className="rounded-md hover:bg-secondary hover:text-accent text-secondary transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-opacity-50"
-            >
-              {isSidebarOpen ? (
-                <PanelLeftClose strokeWidth={1.5} className="h-6 w-6" />
-              ) : (
-                <PanelLeftOpen strokeWidth={1.5} className="h-6 w-6" />
-              )}
-            </button>
+              className="!px-0 transition-colors hover:text-accent"
+            />
           </Tooltip>
 
           {/* New Session Button */}
@@ -50,11 +54,12 @@ const ContentHeader = ({
             {!isSidebarOpen && (
               <Tooltip title="Create new session">
                 <Button
-                  type="text"
-                  className="flex items-center justify-center hover:text-accent"
+                  variant="tertiary"
+                  size="sm"
+                  icon={<Plus className="w-6 h-6" />}
                   onClick={onNewSession}
-                  icon={<Plus className="w-5 h-5" />}
-                ></Button>
+                  className="transition-colors hover:text-accent"
+                />
               </Tooltip>
             )}
           </div>
@@ -80,7 +85,7 @@ const ContentHeader = ({
                     alt={user.name}
                   />
                 ) : (
-                  <div className="border-2 bg-accent h-8 w-8 rounded-full flex items-center justify-center text-white">
+                  <div className="bg-blue-400 h-8 w-8 rounded-full flex items-center justify-center text-gray-800 font-semibold hover:text-message">
                     {user.name?.[0]}
                   </div>
                 )}
@@ -91,13 +96,14 @@ const ContentHeader = ({
           {/* Settings Button */}
           <div className="text-primary">
             <Tooltip title="Settings">
-              <button
+              <Button
+                variant="tertiary"
+                size="sm"
+                icon={<Settings className="h-8 w-8" />}
                 onClick={() => setIsSettingsOpen(true)}
-                className="hover:text-accent transition-colors p-2"
+                className="!px-0 transition-colors hover:text-accent"
                 aria-label="Settings"
-              >
-                <Settings className="h-6 w-6" />
-              </button>
+              />
             </Tooltip>
           </div>
         </div>

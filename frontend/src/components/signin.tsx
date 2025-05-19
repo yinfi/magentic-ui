@@ -1,7 +1,8 @@
-import { Modal, Input, Button, message } from "antd";
+import { Modal, Input, message } from "antd";
 import { setLocalStorage } from "./utils";
 import { appContext } from "../hooks/provider";
 import * as React from "react";
+import { Button } from "./common/Button";
 
 type SignInModalProps = {
   isVisible: boolean;
@@ -31,17 +32,19 @@ const SignInModal = ({ isVisible, onClose }: SignInModalProps) => {
 
   return (
     <Modal
-      title="Enter your username. A change of username will create a new profile."
       open={isVisible}
       footer={null}
       closable={isAlreadySignedIn}
       maskClosable={isAlreadySignedIn}
       onCancel={isAlreadySignedIn ? onClose : undefined}
     >
+      <span className="text-lg">
+        Enter a username.<br></br> A change of username will create a new profile.
+      </span>
       <div className="mb-4">
         <Input
           type="text"
-          placeholder="Enter your username"
+          placeholder="Enter a username"
           value={email}
           onChange={handleEmailChange}
           className="shadow-sm"
@@ -51,7 +54,6 @@ const SignInModal = ({ isVisible, onClose }: SignInModalProps) => {
         <Button
           type="primary"
           onClick={handleSignIn}
-          className="flex items-center justify-center text-white hover:opacity-90 transition-opacity font-semibold"
         >
           Sign In
         </Button>

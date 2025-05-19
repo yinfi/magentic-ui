@@ -265,13 +265,7 @@ const DetailViewer: React.FC<DetailViewerProps> = ({
 
           <div className="flex gap-2">
             {isControlMode && (
-              <div
-                className="flex items-center gap-2 px-2 rounded-2xl"
-                style={{
-                  backgroundColor: "var(--color-warning-primary)",
-                  color: "white",
-                }}
-              >
+              <div className="flex items-center gap-2 px-2 rounded-2xl bg-magenta-800 text-white">
                 <MousePointerClick size={16} />
                 <span>You have control</span>
               </div>

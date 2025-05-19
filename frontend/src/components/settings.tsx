@@ -225,7 +225,6 @@ action_guard_client: *client
   return (
     <>
       <Modal
-        title="Settings"
         open={isOpen}
         onCancel={handleClose}
         closable={!(allowedlistEnabled && cachedWebsites.length === 0)}
@@ -522,7 +521,7 @@ action_guard_client: *client
                               Select LLM for All Clients
                             </span>
                             <Tooltip title="This will update the model configuration for all agent clients (orchestrator, coder, web surfer, and file surfer)">
-                              <InfoCircleOutlined className="text-secondary hover:text-primary cursor-help" />
+                              <InfoCircleOutlined className="text-primary hover:text-primary cursor-help" />
                             </Tooltip>
                           </div>
                           <Select

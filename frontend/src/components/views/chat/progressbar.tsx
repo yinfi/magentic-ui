@@ -74,7 +74,7 @@ export default function ProgressBar({
                     {/* Current section - hidden when hasFinalAnswer */}
                     {!hasFinalAnswer && (
                       <div
-                        className="absolute bg-blue-500 h-1 transition-all duration-300"
+                        className="absolute bg-magenta-800 h-1 transition-all duration-300"
                         style={{
                           left: `${
                             (adjustedProgress.currentStep /
@@ -109,7 +109,10 @@ export default function ProgressBar({
                 </div>
 
                 {/* Hoverable step sections */}
-                <div className="absolute w-full flex" style={{ top: "-12px", height: "24px" }}>
+                <div
+                  className="absolute w-full flex"
+                  style={{ top: "-12px", height: "24px" }}
+                >
                   {Array.from(
                     { length: adjustedProgress.totalSteps },
                     (_, index) => {
@@ -135,8 +138,12 @@ export default function ProgressBar({
                           <div
                             className="absolute h-full cursor-help"
                             style={{
-                              left: `${(index / adjustedProgress.totalSteps) * 100}%`,
-                              width: `${(1 / adjustedProgress.totalSteps) * 100}%`,
+                              left: `${
+                                (index / adjustedProgress.totalSteps) * 100
+                              }%`,
+                              width: `${
+                                (1 / adjustedProgress.totalSteps) * 100
+                              }%`,
                             }}
                           />
                         </Tooltip>
@@ -189,7 +196,7 @@ export default function ProgressBar({
                                 index < adjustedProgress.currentStep
                                   ? "bg-green-600 text-white"
                                   : index === adjustedProgress.currentStep
-                                  ? "bg-blue-500 text-white"
+                                  ? "bg-magenta-800 text-white"
                                   : "bg-gray-400 text-white"
                               }`}
                             >

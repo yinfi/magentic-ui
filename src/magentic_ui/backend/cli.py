@@ -5,6 +5,7 @@ import uvicorn
 from typing_extensions import Annotated
 from typing import Optional
 from pathlib import Path
+import logging
 
 from .version import VERSION
 from .._docker import (
@@ -14,6 +15,8 @@ from .._docker import (
     build_browser_image,
     build_python_image,
 )
+
+logging.basicConfig(level=logging.WARNING)
 
 app = typer.Typer()
 

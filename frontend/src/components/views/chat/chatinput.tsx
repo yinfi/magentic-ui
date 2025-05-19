@@ -8,7 +8,16 @@ import {
 import * as React from "react";
 import { appContext } from "../../../hooks/provider";
 import { IStatus } from "../../types/app";
-import { Upload, message, Button, Tooltip, notification, Modal, Dropdown, Menu } from "antd";
+import {
+  Upload,
+  message,
+  Button,
+  Tooltip,
+  notification,
+  Modal,
+  Dropdown,
+  Menu,
+} from "antd";
 import type { UploadFile, UploadProps, RcFile } from "antd/es/upload/interface";
 import { FileTextIcon, ImageIcon, XIcon, UploadIcon } from "lucide-react";
 import { InputRequest, ApprovalInputRequest } from "../../types/datamodel";
@@ -722,7 +731,9 @@ const ChatInput = React.forwardRef<{ focus: () => void }, ChatInputProps>(
                 {/* File upload button replaced with Dropdown */}
                 {enable_upload && (
                   <div
-                    className={`$${isInputDisabled ? "pointer-events-none opacity-50" : ""}`}
+                    className={`$${
+                      isInputDisabled ? "pointer-events-none opacity-50" : ""
+                    }`}
                   >
                     <Dropdown
                       overlay={
@@ -734,7 +745,9 @@ const ChatInput = React.forwardRef<{ focus: () => void }, ChatInputProps>(
                           </Menu.Item>
                           <Menu.SubMenu key="attach-plan" title="Attach Plan">
                             {allPlans.length === 0 ? (
-                              <Menu.Item disabled key="no-plans">No plans available</Menu.Item>
+                              <Menu.Item disabled key="no-plans">
+                                No plans available
+                              </Menu.Item>
                             ) : (
                               allPlans.map((plan: any) => (
                                 <Menu.Item
@@ -752,9 +765,7 @@ const ChatInput = React.forwardRef<{ focus: () => void }, ChatInputProps>(
                     >
                       <Tooltip
                         title={
-                          <span className="text-sm">
-                            Attach File or Plan
-                          </span>
+                          <span className="text-sm">Attach File or Plan</span>
                         }
                         placement="top"
                       >
@@ -774,7 +785,7 @@ const ChatInput = React.forwardRef<{ focus: () => void }, ChatInputProps>(
                   <button
                     type="button"
                     onClick={handlePause}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white rounded flex justify-center items-center w-11 h-9 transition duration-300"
+                    className="bg-magenta-800 hover:bg-magenta-900 text-white rounded flex justify-center items-center w-11 h-9 transition duration-300"
                   >
                     <PauseCircleIcon className="h-6 w-6" />
                   </button>
@@ -784,10 +795,10 @@ const ChatInput = React.forwardRef<{ focus: () => void }, ChatInputProps>(
                     type="button"
                     onClick={handleSubmit}
                     disabled={isInputDisabled}
-                    className={`bg-accent transition duration-300 rounded flex justify-center items-center w-11 h-9 ${
+                    className={`bg-magenta-800 transition duration-300 rounded flex justify-center items-center w-11 h-9 ${
                       isInputDisabled
                         ? "cursor-not-allowed"
-                        : "hover:brightness-75"
+                        : "hover:bg-magenta-900"
                     }`}
                   >
                     <PaperAirplaneIcon className="h-6 w-6 text-white" />

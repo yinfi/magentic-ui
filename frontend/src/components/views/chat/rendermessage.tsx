@@ -96,17 +96,17 @@ const getStepIcon = (
   is_step_failed?: boolean
 ) => {
   if (is_step_failed)
-    return <AlertTriangle size={16} className="text-orange-500" />;
+    return <AlertTriangle size={16} className="text-magenta-800" />;
   if (is_step_repeated)
-    return <AlertTriangle size={16} className="text-red-500" />;
+    return <AlertTriangle size={16} className="text-magenta-800" />;
   if (status === "completed")
-    return <CheckCircle size={16} className="text-green-500" />;
+    return <CheckCircle size={16} className="text-magenta-800" />;
   if (status === "current" && runStatus === "active")
-    return <RefreshCw size={16} className="text-blue-500 animate-spin" />;
+    return <RefreshCw size={16} className="text-magenta-800 animate-spin" />;
   if (status === "upcoming")
     return <Clock size={16} className="text-gray-400" />;
   if (status === "failed")
-    return <AlertTriangle size={16} className="text-red-500" />;
+    return <AlertTriangle size={16} className="text-magenta-500" />;
   return null;
 };
 
@@ -218,7 +218,7 @@ const RenderMultiModalBrowserStep: React.FC<{
               <div className="flex-shrink-0 mr-1 -ml-1 mt-2">
                 <Globe2
                   size={16}
-                  className="text-blue-500 hover:text-blue-600 cursor-pointer"
+                  className="text-magenta-800 hover:text-magenta-900 cursor-pointer"
                   onClick={() => onImageClick?.(index)}
                 />
               </div>
@@ -388,7 +388,7 @@ const RenderStepExecution: React.FC<RenderStepExecutionProps> = memo(
         >
           <div className="flex items-center w-full">
             <button
-              className="flex-none flex items-center justify-center w-8 h-8 rounded-full bg-secondary hover:bg-accent transition-colors"
+              className="flex-none flex items-center justify-center w-8 h-8 rounded-full bg-secondary transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 handleToggle();
@@ -574,7 +574,7 @@ const RenderUserMessage: React.FC<{
           {attachedFiles.map((file, index) => (
             <div
               key={index}
-              className="flex items-center gap-1 bg-blue-600 rounded px-2 py-1 text-xs"
+              className="flex items-center gap-1  rounded px-2 py-1 text-xs"
               title={file.name}
             >
               {file.type.startsWith("image") ? (
@@ -691,7 +691,7 @@ export const RenderMessage: React.FC<MessageProps> = memo(
           <div
             className={`${
               isUser || isUserProxy
-                ? `text-white rounded-2xl bg-blue-500 rounded-tr-sm px-4 py-2 ${
+                ? `text-primary rounded-2xl bg-tertiary rounded-tr-sm px-4 py-2 ${
                     parsedContent.plan && parsedContent.plan.length > 0
                       ? "w-[80%]"
                       : "max-w-[80%]"

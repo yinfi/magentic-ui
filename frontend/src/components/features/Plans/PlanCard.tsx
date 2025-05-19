@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { Card, Modal, Tooltip, Input } from "antd";
+import { Card, Modal, Tooltip, Input, Button } from "antd";
 import { PlayCircle, Edit2, Clock, Trash2, Download } from "lucide-react";
 import { planAPI } from "../../views/api";
 import PlanView from "../../views/chat/plan";
 import { getRelativeTimeString } from "../../views/atoms";
 import { IPlan, IPlanStep } from "../../types/plan";
-
 interface PlanCardProps {
   plan: IPlan;
   onUsePlan?: (plan: IPlan) => void;
@@ -175,7 +174,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
                     onClick={handleExport}
                     aria-label="Export plan"
                   >
-                    <Download className="h-5 w-5 text-gray-400 hover:text-blue-500 transition-colors" />
+                    <Download className="h-5 w-5 transition-colors" />
                   </button>
                 </Tooltip>
                 <Tooltip title="Delete this plan">
@@ -184,7 +183,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
                     onClick={handleDelete}
                     aria-label="Delete plan"
                   >
-                    <Trash2 className="h-5 w-5 text-gray-400 hover:text-red-500 transition-colors" />
+                    <Trash2 className="h-5 w-5 transition-colors" />
                   </button>
                 </Tooltip>
               </div>
@@ -197,26 +196,28 @@ const PlanCard: React.FC<PlanCardProps> = ({
         actions={[
           <div key="use" className="flex items-center justify-center h-full">
             <Tooltip title="Create a new session with this plan loaded">
-              <button
-                className="bg-transparent border-none cursor-pointer flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors font-semibold"
+              <Button
+                type="text"
+                className="cursor-pointer flex items-center justify-center font-semibold transition-colors"
                 onClick={() => {
                   if (onUsePlan) onUsePlan(plan);
                 }}
               >
                 <PlayCircle className="h-4 w-4 mr-1" />
                 Run Plan
-              </button>
+              </Button>
             </Tooltip>
           </div>,
           <div key="edit" className="flex items-center justify-center h-full">
             <Tooltip title="Modify plan title and steps">
-              <button
-                className="bg-transparent border-none cursor-pointer flex items-center justify-center text-gray-600 hover:text-blue-600 transition-colors font-semibold"
+              <Button
+                type="text"
+                className="cursor-pointer flex items-center justify-center font-semibold transition-colors"
                 onClick={handleEdit}
               >
                 <Edit2 className="h-4 w-4 mr-1" />
                 Edit
-              </button>
+              </Button>
             </Tooltip>
           </div>,
         ]}
@@ -224,7 +225,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
         <div className="flex flex-col flex-grow justify-between">
           <div>
             <div className="mb-4">
-              <p className="text-sm text-gray-600">{steps.length} steps</p>
+              <p className="text-sm">{steps.length} steps</p>
             </div>
 
             <div className="space-y-2 min-h-[80px]">
@@ -237,14 +238,14 @@ const PlanCard: React.FC<PlanCardProps> = ({
                 </div>
               ))}
               {steps.length > 3 && (
-                <div className="text-xs text-gray-400">
+                <div className="text-xs">
                   + {steps.length - 3} more steps
                 </div>
               )}
             </div>
           </div>
 
-          <div className="mt-4 text-xs text-gray-500 flex items-center">
+          <div className="mt-4 text-xs flex items-center">
             {plan.created_at ? (
               <>
                 <Clock className="h-3 w-3 mr-1" />
@@ -267,7 +268,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
         {isModalOpen && (
           <div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium mb-1">
                 Plan Title
               </label>
               <Input

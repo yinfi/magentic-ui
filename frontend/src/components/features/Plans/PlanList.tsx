@@ -330,7 +330,7 @@ const PlanList: React.FC<PlanListProps> = ({
           </Tooltip>
           <Input
             placeholder="Search plans..."
-            prefix={<SearchOutlined className="text-gray-400" />}
+            prefix={<SearchOutlined className="text-primary" />}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="rounded-md"
@@ -361,7 +361,7 @@ const PlanList: React.FC<PlanListProps> = ({
             </div>
           ))
         ) : searchTerm ? (
-          <div className="col-span-3 flex flex-col items-center justify-center py-12 text-gray-500">
+          <div className="col-span-3 flex flex-col items-center justify-center py-12 text-primary">
             <SearchOutlined
               style={{ fontSize: "48px", marginBottom: "16px" }}
             />
@@ -375,7 +375,7 @@ const PlanList: React.FC<PlanListProps> = ({
             </Button>
           </div>
         ) : (
-          <div className="col-span-3 flex flex-col items-center justify-center py-12 text-gray-500">
+          <div className="col-span-3 flex flex-col items-center justify-center py-12 text-primary">
             <p>No plans yet. Create one or import an existing plan.</p>
           </div>
         )}

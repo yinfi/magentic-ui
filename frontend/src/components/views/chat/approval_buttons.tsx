@@ -64,7 +64,7 @@ const ApprovalButtons: React.FC<ApprovalButtonsProps> = ({
             <button
               type="button"
               onClick={onRegeneratePlan}
-              className="bg-blue-500 hover:bg-blue-600 text-white rounded flex justify-center items-center px-2 py-1.5 transition duration-300"
+              className="bg-magenta-800 hover:bg-magenta-900 text-white rounded flex justify-center items-center px-2 py-1.5 transition duration-300"
             >
               <RotateCw className="h-5 w-5 mr-1" />
               <span className="text-sm mr-1">Generate New Plan</span>

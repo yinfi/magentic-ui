@@ -71,7 +71,7 @@ const MagenticUILayout = ({
           theme={{
             token: {
               borderRadius: 4,
-              colorBgBase: darkMode === "dark" ? "#05080C" : "#ffffff",
+              colorBgBase: darkMode === "dark" ? "#2a2a2a" : "#ffffff",
             },
             algorithm:
               darkMode === "dark"
