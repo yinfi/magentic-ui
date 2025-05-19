@@ -550,10 +550,27 @@ class CoderAgent(BaseChatAgent, Component[CoderAgentConfig]):
                 ),
                 inner_messages=inner_messages,
             )
+        except Exception as e:
+            logger.error(f"Error in CoderAgent: {e}")
+            # add to chat history
+            self._chat_history.append(
+                TextMessage(
+                    content=f"An error occurred while executing the code: {e}",
+                    source=self.name,
+                )
+            )
+            yield Response(
+                chat_message=TextMessage(
+                    content="An error occurred while executing the code.",
+                    source=self.name,
+                    metadata={"internal": "no"},
+                ),
+                inner_messages=inner_messages,
+            )
         finally:
             # Cancel the monitor task.
-            monitor_pause_task.cancel()
             try:
+                monitor_pause_task.cancel()
                 await monitor_pause_task
             except asyncio.CancelledError:
                 pass
