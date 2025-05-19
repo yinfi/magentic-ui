@@ -404,13 +404,13 @@ action_guard_client: *client
                       />
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      {/* <span className="flex items-center gap-2">
+                    {/*<div className="flex items-center justify-between">
+                       <span className="flex items-center gap-2">
                         Use Bing Search for Planning
                         <Tooltip title="When enabled, Magentic-UI will use Bing Search when coming up with a plan. Note this adds 10 seconds to the planning time.">
                           <InfoCircleOutlined className="text-secondary hover:text-primary cursor-help" />
                         </Tooltip>
-                      </span> */}
+                      </span> 
                       <Switch
                         checked={config.do_bing_search}
                         checkedChildren="ON"
@@ -420,6 +420,7 @@ action_guard_client: *client
                         }
                       />
                     </div>
+                    */}
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-2">
                         Retrieve Relevant Plans
