@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "magentic_ui" 
+name = "magentic_ui"
 license = "MIT"
-version = "0.0.2"
+version = "0.0.3"
 description = ''
 readme = "README.md"
 requires-python = ">=3.10"
