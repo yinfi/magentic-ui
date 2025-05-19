@@ -63,7 +63,7 @@ Magentic-UI is a multi-agent system consisting of 5 agents - an Orchestrator tha
 
 
 <p align="center">
-  <img src="./docs/magenticui.png" alt="Magentic-UI" height="400">
+  <img src="./docs/magenticui.jpg" alt="Magentic-UI" height="400">
 </p>
 
 Magentic-UI’s underlying system is a team of specialized agents adapted from AutoGen’s Magentic-One system. The agents work together to create a modular system:
