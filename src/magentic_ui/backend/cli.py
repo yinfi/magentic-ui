@@ -16,7 +16,7 @@ from .._docker import (
     build_python_image,
 )
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.ERROR)
 
 app = typer.Typer()
 
