@@ -103,20 +103,11 @@ class FileSurfer(BaseChatAgent, Component[FileSurferConfig]):
     It cannot manipulate or create files, use the coder agent if that is needed.
      """
 
-    date_today = datetime.now().strftime("%Y-%m-%d")
     system_prompt_file_surfer_template = """
     You are a helpful AI Assistant.
     When given a user query, use available functions to help the user with their request.
     The date today is: {date_today}
     """
-
-    SYSTEM_PROMPT_FILE_SURFER = system_prompt_file_surfer_template.format(
-        date_today=date_today
-    )
-
-    DEFAULT_SYSTEM_MESSAGES = [
-        SystemMessage(content=SYSTEM_PROMPT_FILE_SURFER),
-    ]
 
     def __init__(
         self,
@@ -276,21 +267,25 @@ class FileSurfer(BaseChatAgent, Component[FileSurferConfig]):
                 content=task_content,
             )
 
+            system_prompt_file_surfer = self.system_prompt_file_surfer_template.format(
+                date_today=datetime.now().strftime("%Y-%m-%d")
+            )
+
+            default_system_messages = [
+                SystemMessage(content=system_prompt_file_surfer),
+            ]
+
             # Re-initialize model context to meet token limit quota
             try:
                 await self._model_context.clear()
                 for msg in (
-                    history
-                    + self.DEFAULT_SYSTEM_MESSAGES
-                    + [context_message, task_message]
+                    history + default_system_messages + [context_message, task_message]
                 ):
                     await self._model_context.add_message(msg)
                 token_limited_history = await self._model_context.get_messages()
             except Exception:
                 token_limited_history = list(
-                    history
-                    + self.DEFAULT_SYSTEM_MESSAGES
-                    + [context_message, task_message]
+                    history + default_system_messages + [context_message, task_message]
                 )
 
             create_result = await self._model_client.create(
