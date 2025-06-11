@@ -293,9 +293,10 @@ def try_format_step(raw: str, colour: str) -> bool:
     if not ok or not {"step", "content"}.issubset(obj):
         return False
     width = _terminal_width()
+    title = obj.get("title", f"Step {obj['step']}")
     print(
         f"\n{BOLD}{colour}╔{'═' * (width - 4)}╗\n"
-        f"║ {obj.get('title', f'Step {obj['step']}'):<{width - 6}}║\n"
+        f"║ {title:<{width - 6}}║\n"
         f"╚{'═' * (width - 4)}╝{RESET}\n"
     )
     print(f"{BOLD}{colour}┃{RESET} {obj['content']}\n")

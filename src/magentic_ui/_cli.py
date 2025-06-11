@@ -1,22 +1,25 @@
-import os
-from pathlib import Path
-import sys
-import json
-import asyncio
 import argparse
+import asyncio
+import json
+import logging
+import os
 import signal
-from datetime import datetime
+import sys
 import types
+from datetime import datetime
+from pathlib import Path
+from typing import Any, List, Literal, Optional, cast
+
 import yaml
-from typing import Any, Optional, Literal, cast
 from autogen_core import EVENT_LOGGER_NAME, CancellationToken
-from .ui import PrettyConsole, Console
+from .cli import Console, PrettyConsole
 from .task_team import get_task_team
 from loguru import logger
-import logging
-from .utils import LLMCallFilter
-from .types import RunPaths
+
+from .agents.mcp._config import McpAgentConfig
 from .magentic_ui_config import MagenticUIConfig, ModelClientConfigs
+from .types import RunPaths
+from .utils import LLMCallFilter
 
 BOLD = "\033[1m"
 RESET = "\033[0m"
@@ -114,6 +117,7 @@ async def get_team(
     task_metadata: str | None = None,
     hints: str | None = None,
     answer: str | None = None,
+    mcp_agents: List[McpAgentConfig] | None = None,
     use_pretty_ui: bool = True,
 ) -> None:
     log_debug("=== Starting get_team function ===", debug)
@@ -212,6 +216,8 @@ async def get_team(
         coder=client_config_dict.get("coder_client", None),
         file_surfer=client_config_dict.get("file_surfer_client", None),
     )
+
+    mcp_agents = mcp_agents or []
     log_debug("Model client configs created for agents", debug)
 
     magentic_ui_config = MagenticUIConfig(
@@ -231,6 +237,7 @@ async def get_team(
         hints=hints,
         answer=answer,
         inside_docker=inside_docker,
+        mcp_agent_configs=mcp_agents,
     )
     log_debug(
         f"MagenticUIConfig created with planning={cooperative_planning}, execution={autonomous_execution}",
@@ -490,13 +497,19 @@ def main() -> None:
         help="ActionGuard policy ('always', 'never', 'auto-conservative', 'auto-permissive'; default: never)",
     )
     advanced.add_argument(
+        "--mcp-agents-file",
+        dest="mcp_agents_file",
+        type=str,
+        default=None,
+        help="Path to a .yaml file containing configuration compatible with MagenticUIConfig.mcp_agents",
+    )
+    advanced.add_argument(
         "--old-cli",
         dest="use_pretty_ui",
         action="store_false",
         default=True,
         help="Use the old console without fancy formatting (default: use pretty terminal)",
     )
-
     args = parser.parse_args()
     log_debug(f"Command line arguments parsed: debug={args.debug}", args.debug)
 
@@ -621,6 +634,24 @@ def main() -> None:
         args.autonomous_execution = True
         args.cooperative_planning = False
 
+    # Try and load an MCP Agents file
+    mcp_agents: List[McpAgentConfig] = []
+    if args.mcp_agents_file:
+        with open(args.mcp_agents_file) as fd:
+            mcp_agents_data: Any = yaml.safe_load(fd)
+
+        if not isinstance(mcp_agents_data, list):
+            raise TypeError(
+                f"Expected root element of mcp_agents_file to be a list but found: {type(mcp_agents_data)}"
+            )
+
+        for value in mcp_agents_data:  # type: ignore
+            mcp_agent = McpAgentConfig.model_validate(value)
+            mcp_agents.append(mcp_agent)
+            logger.info(
+                f"Loaded MCP Agent '{mcp_agent.name}' with MCP Servers [{', '.join(server.server_name for server in mcp_agent.mcp_servers)}]"
+            )
+
     # Add a basic signal handler to log as soon as SIGINT is received
     def signal_handler(sig: int, frame: types.FrameType | None) -> Any:
         log_debug(f"Signal handler caught signal: {sig}", args.debug)
@@ -657,6 +688,7 @@ def main() -> None:
             hints=args.metadata_hints if args.user_proxy_type == "metadata" else None,
             answer=args.metadata_answer if args.user_proxy_type == "metadata" else None,
             use_pretty_ui=args.use_pretty_ui,
+            mcp_agents=mcp_agents,
         )
     )
     log_debug("Asyncio event loop and get_team function completed", args.debug)
