@@ -151,6 +151,91 @@ TOOL_PAGE_UP: ToolSchema = load_tool(
     }
 )
 
+TOOL_TAKE_SCREENSHOT: ToolSchema = load_tool(
+    {
+        "type": "function",
+        "function": {
+            "name": "take_screenshot",
+            "description": "Takes a screenshot of the current page and saves it to the specified filename within the run's debug/downloads directory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "explanation": {
+                        "type": "string",
+                        "description": EXPLANATION_TOOL_PROMPT,
+                    },
+                    "filename": {
+                        "type": "string",
+                        "description": "The filename for the screenshot (e.g., 'login_step_failure.png'). It will be saved in the default downloads/debug directory.",
+                    },
+                },
+                "required": ["explanation", "filename"],
+            },
+        },
+        "metadata": {"requires_approval": "never"},
+    }
+)
+
+TOOL_WAIT_FOR_ELEMENT_VISIBLE: ToolSchema = load_tool(
+    {
+        "type": "function",
+        "function": {
+            "name": "wait_for_element_visible",
+            "description": "Waits for an element specified by a selector to be visible on the page.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "explanation": {
+                        "type": "string",
+                        "description": EXPLANATION_TOOL_PROMPT,
+                    },
+                    "selector": {
+                        "type": "string",
+                        "description": "The selector (CSS, XPath, or numeric ID) of the element to wait for.",
+                    },
+                    "timeout_seconds": {
+                        "type": "number",
+                        "description": "Maximum time in seconds to wait for the element. Default: 10.",
+                        "default": 10,
+                    },
+                },
+                "required": ["explanation", "selector"],
+            },
+        },
+        "metadata": {"requires_approval": "never"},
+    }
+)
+
+TOOL_WAIT_FOR_ELEMENT_CLICKABLE: ToolSchema = load_tool(
+    {
+        "type": "function",
+        "function": {
+            "name": "wait_for_element_clickable",
+            "description": "Waits for an element specified by a selector to be clickable (visible and enabled).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "explanation": {
+                        "type": "string",
+                        "description": EXPLANATION_TOOL_PROMPT,
+                    },
+                    "selector": {
+                        "type": "string",
+                        "description": "The selector (CSS, XPath, or numeric ID) of the element to wait for.",
+                    },
+                    "timeout_seconds": {
+                        "type": "number",
+                        "description": "Maximum time in seconds to wait for the element. Default: 10.",
+                        "default": 10,
+                    },
+                },
+                "required": ["explanation", "selector"],
+            },
+        },
+        "metadata": {"requires_approval": "never"},
+    }
+)
+
 TOOL_PAGE_DOWN: ToolSchema = load_tool(
     {
         "type": "function",
@@ -645,8 +730,8 @@ TOOL_UPLOAD_FILE: ToolSchema = load_tool(
                         "description": "The explanation of the action to be performed.",
                     },
                     "target_id": {
-                        "type": "string",
-                        "description": "The ID of the target input element.",
+                        "type": "string", # Could be numeric ID or a new CSS/XPath if combined
+                        "description": "The ID or selector of the target input element.",
                     },
                     "file_path": {
                         "type": "string",
@@ -659,5 +744,55 @@ TOOL_UPLOAD_FILE: ToolSchema = load_tool(
                 "requires_approval": "always",
             },
         },
+    }
+)
+
+TOOL_FIND_ELEMENT_BY_CSS: ToolSchema = load_tool(
+    {
+        "type": "function",
+        "function": {
+            "name": "find_element_by_css",
+            "description": "Finds an element using a CSS selector. Returns its properties including its numeric ID if it's currently marked on the page.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "explanation": {
+                        "type": "string",
+                        "description": EXPLANATION_TOOL_PROMPT,
+                    },
+                    "css_selector": {
+                        "type": "string",
+                        "description": "The CSS selector to find the element.",
+                    },
+                },
+                "required": ["explanation", "css_selector"],
+            },
+        },
+        "metadata": {"requires_approval": "never"},
+    }
+)
+
+TOOL_FIND_ELEMENT_BY_XPATH: ToolSchema = load_tool(
+    {
+        "type": "function",
+        "function": {
+            "name": "find_element_by_xpath",
+            "description": "Finds an element using an XPath expression. Returns its properties including its numeric ID if it's currently marked on the page.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "explanation": {
+                        "type": "string",
+                        "description": EXPLANATION_TOOL_PROMPT,
+                    },
+                    "xpath": {
+                        "type": "string",
+                        "description": "The XPath expression to find the element.",
+                    },
+                },
+                "required": ["explanation", "xpath"],
+            },
+        },
+        "metadata": {"requires_approval": "never"},
     }
 )

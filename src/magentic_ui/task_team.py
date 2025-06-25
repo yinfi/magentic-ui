@@ -246,12 +246,35 @@ async def get_task_team(
         team_participants.extend([coder_agent, file_surfer])
     team_participants.extend(mcp_agents)
 
-    team = GroupChat(
-        participants=team_participants,
-        orchestrator_config=orchestrator_config,
-        model_client=model_client_orch,
-        memory_provider=memory_provider,
-    )
+    if magentic_ui_config.testing_mode:
+        # Placeholder for TestRunnerGroupChat and TestRunnerOrchestrator initialization
+        # This will involve creating a new GroupChat variant or modifying the existing one
+        # to use a TestRunnerOrchestrator and handle TestSuite inputs.
+        # For now, we'll fall back to the standard GroupChat to keep things runnable.
+        # In a future step, this will be replaced with:
+        # team = TestRunnerGroupChat(
+        #     participants=team_participants, # May need different participants for testing
+        #     test_runner_orchestrator_config=test_runner_orchestrator_config, # A new config
+        #     model_client=model_client_orch,
+        #     # ... other relevant parameters
+        # )
+        # raise NotImplementedError("Testing mode is not fully implemented yet in get_task_team.")
+        # For now, let's log that we are in testing mode and proceed with normal group chat
+        # This will be changed in subsequent steps.
+        print("INFO: MagenticUIConfig has testing_mode=True. TestRunnerTeam would be initialized here.")
+        team = GroupChat(
+            participants=team_participants,
+            orchestrator_config=orchestrator_config,
+            model_client=model_client_orch,
+            memory_provider=memory_provider,
+        )
+    else:
+        team = GroupChat(
+            participants=team_participants,
+            orchestrator_config=orchestrator_config,
+            model_client=model_client_orch,
+            memory_provider=memory_provider,
+        )
 
     await team.lazy_init()
     return team

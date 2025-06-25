@@ -1338,9 +1338,88 @@ class PlaywrightController:
         await input_file_element.wait_for(state="attached")
 
         if await input_file_element.count() > 0:
-            await input_file_element.set_input_files(file_path)
+            if target_id.startswith("css=") or target_id.startswith("xpath="):
+                # This case implies target_id is already a selector
+                # However, the current locator is [__elementId='...'], which is for numeric IDs.
+                # This part needs reconciliation if target_id for upload_file can also be a selector.
+                # For now, assuming upload_file's target_id remains a numeric __elementId.
+                # If find_element_by_css/xpath returns a selector, a different approach for upload is needed
+                # or upload_file tool must always use a numeric ID obtained via find_element or visual marking.
+                # To keep this change minimal for now, I'll assume target_id for upload is still numeric.
+                # If it were a selector, it would be:
+                # selector_type, selector_value = target_id.split("=", 1)
+                # if selector_type == "css":
+                #     await page.locator(selector_value).set_input_files(file_path)
+                # elif selector_type == "xpath":
+                #     await page.locator(selector_value).first.set_input_files(file_path)
+                # This logic is complex because input_file_element is already located by __elementId.
+                # Simplest is to require numeric ID for upload_file for now.
+                await input_file_element.set_input_files(file_path)
+
+            else: # Original numeric ID
+                await input_file_element.set_input_files(file_path)
         else:
             raise ValueError(f"Element with ID '{target_id}' not found.")
+
+    async def find_element_by_css(self, page: Page, selector: str) -> Optional[Dict[str, Any]]:
+        element = await page.query_selector(selector)
+        if element:
+            tag_name = await element.evaluate("el => el.tagName.toLowerCase()")
+            text_content = await element.text_content() or ""
+            is_visible = await element.is_visible()
+            is_enabled = await element.is_enabled()
+            attributes = await element.evaluate("el => Array.from(el.attributes).reduce((obj, attr) => { obj[attr.name] = attr.value; return obj; }, {})")
+
+            # Attempt to get __elementId if it's marked
+            element_id_attr = None
+            if "__elementid" in attributes: # check lowercase due to evaluate
+                element_id_attr = attributes["__elementid"]
+
+            return {
+                "selector_type": "css",
+                "selector": selector,
+                "tag_name": tag_name,
+                "text_content": text_content.strip(),
+                "attributes": attributes,
+                "is_visible": is_visible,
+                "is_enabled": is_enabled,
+                "internal_id": element_id_attr, # This is the __elementId if present
+                "found": True
+            }
+        return {"selector_type": "css", "selector": selector, "found": False}
+
+    async def find_element_by_xpath(self, page: Page, xpath: str) -> Optional[Dict[str, Any]]:
+        element_handle = None
+        try:
+            # page.locator(xpath) can find multiple, .first ensures we get one ElementHandle if any match
+            element_handle = await page.locator(xpath).first.element_handle()
+        except PlaywrightError: # Handles cases where the locator finds nothing, preventing errors
+            element_handle = None
+
+        if element_handle:
+            tag_name = await element_handle.evaluate("el => el.tagName.toLowerCase()")
+            text_content = await element_handle.text_content() or ""
+            is_visible = await element_handle.is_visible()
+            is_enabled = await element_handle.is_enabled()
+            attributes = await element_handle.evaluate("el => Array.from(el.attributes).reduce((obj, attr) => { obj[attr.name] = attr.value; return obj; }, {})")
+
+            element_id_attr = None
+            if "__elementid" in attributes: # check lowercase
+                 element_id_attr = attributes["__elementid"]
+
+            await element_handle.dispose()
+            return {
+                "selector_type": "xpath",
+                "selector": xpath,
+                "tag_name": tag_name,
+                "text_content": text_content.strip(),
+                "attributes": attributes,
+                "is_visible": is_visible,
+                "is_enabled": is_enabled,
+                "internal_id": element_id_attr,
+                "found": True
+            }
+        return {"selector_type": "xpath", "selector": xpath, "found": False}
 
     async def get_all_webpage_text(self, page: Page, n_lines: int = 50) -> str:
         """
@@ -1443,6 +1522,37 @@ class PlaywrightController:
             page, start_x, start_y, end_x, end_y
         )
         self.last_cursor_position = self._animation.last_cursor_position
+
+    async def _get_playwright_locator(self, page: Page, selector: str) -> Locator:
+        if selector.startswith("css="):
+            return page.locator(selector[len("css="):])
+        elif selector.startswith("xpath="):
+            return page.locator(selector[len("xpath="):])
+        elif selector.startswith("//") or selector.startswith("./"): # Simple heuristic for XPath
+            return page.locator(selector)
+        elif selector.isnumeric(): # Assumes numeric string is an __elementId
+            return page.locator(f"[__elementId='{selector}']")
+        else: # Default to CSS selector
+            return page.locator(selector)
+
+    async def wait_for_element_state(
+        self,
+        page: Page,
+        selector: str,
+        state: Literal["visible", "hidden", "enabled", "disabled", "editable", "attached", "detached"],
+        timeout_seconds: float
+    ) -> bool:
+        await self._ensure_page_ready(page)
+        locator = self._get_playwright_locator(page, selector)
+        try:
+            await locator.first.wait_for(state=state, timeout=timeout_seconds * 1000)
+            return True
+        except PlaywrightTimeoutError:
+            logger.warning(f"Timeout waiting for element '{selector}' to be {state} after {timeout_seconds}s.")
+            return False
+        except PlaywrightError as e:
+            logger.error(f"Error waiting for element '{selector}' state {state}: {e}")
+            return False
 
     async def cleanup_animations(self, page: Page) -> None:
         await self._animation.cleanup_animations(page)

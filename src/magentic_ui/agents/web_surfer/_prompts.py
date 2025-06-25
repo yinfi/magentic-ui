@@ -31,6 +31,11 @@ You have access to the following tools:
 - switch_tab: Switch to a specific tab by its index
 - close_tab: Close a specific tab by its index
 - upload_file: Upload a file to the target input element
+    - find_element_by_css: Find an element by its CSS selector and return its properties
+    - find_element_by_xpath: Find an element by its XPath expression and return its properties
+    - wait_for_element_visible: Wait for an element (by selector) to become visible
+    - wait_for_element_clickable: Wait for an element (by selector) to become clickable (visible and enabled)
+    - take_screenshot: Take a screenshot and save it with a given filename
 
 Note that some tools may require user approval before execution, particularly for irreversible actions like form submissions or purchases.
 
@@ -125,6 +130,11 @@ You have access to the following tools and you must use a single tool to respond
 - tool_name: "switch_tab", tool_args: {{"tab_index": int, "require_approval": bool}} - Switch to a specific tab by its index. The tab_index arg specifies which tab to switch to.
 - tool_name: "close_tab", tool_args: {{"tab_index": int}} - Close a specific tab by its index. The tab_index arg specifies which tab to close.
 - tool_name: "upload_file", tool_args: {{"target_id": int, "file_path": str}} - Upload a file to the target input element. The target_id arg specifies which field to upload the file to, and the file_path arg specifies the path of the file to upload.
+- tool_name: "find_element_by_css", tool_args: {{"css_selector": str}} - Find an element by its CSS selector. Returns element properties including its internal numeric ID if marked.
+- tool_name: "find_element_by_xpath", tool_args: {{"xpath": str}} - Find an element by its XPath expression. Returns element properties including its internal numeric ID if marked.
+- tool_name: "wait_for_element_visible", tool_args: {{"selector": str, "timeout_seconds": float}} - Wait for an element to be visible.
+- tool_name: "wait_for_element_clickable", tool_args: {{"selector": str, "timeout_seconds": float}} - Wait for an element to be clickable.
+- tool_name: "take_screenshot", tool_args: {{"filename": str}} - Take a screenshot and save it.
 
 Note that some tools require approval for irreversible actions like form submissions or purchases. The require_approval parameter should be set to true for such cases.
 

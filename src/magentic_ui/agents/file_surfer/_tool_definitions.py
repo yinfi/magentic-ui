@@ -30,6 +30,60 @@ TOOL_OPEN_PATH = load_tool(
     }
 )
 
+TOOL_READ_CSV_FILE = load_tool(
+    {
+        "type": "function",
+        "function": {
+            "name": "read_csv_file",
+            "description": "Reads a CSV file from the given path and returns its content as a list of dictionaries.",
+            "parameters": ParametersSchema(
+                type="object",
+                properties={
+                    "explanation": {
+                        "type": "string",
+                        "description": EXPLANATION_TOOL_PROMPT,
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "The relative or absolute path of the CSV file to read.",
+                    },
+                },
+                required=["explanation", "path"],
+            ),
+        },
+        "metadata": {
+            "requires_approval": "always", # Reading files often needs approval
+        },
+    }
+)
+
+TOOL_READ_JSON_FILE = load_tool(
+    {
+        "type": "function",
+        "function": {
+            "name": "read_json_file",
+            "description": "Reads a JSON file from the given path and returns its parsed content (usually a dictionary or list).",
+            "parameters": ParametersSchema(
+                type="object",
+                properties={
+                    "explanation": {
+                        "type": "string",
+                        "description": EXPLANATION_TOOL_PROMPT,
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "The relative or absolute path of the JSON file to read.",
+                    },
+                },
+                required=["explanation", "path"],
+            ),
+        },
+        "metadata": {
+            "requires_approval": "always", # Reading files often needs approval
+        },
+    }
+)
+
 TOOL_LIST_CURRENT_DIRECTORY = load_tool(
     {
         "type": "function",
