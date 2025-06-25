@@ -113,3 +113,4 @@ class MagenticUIConfig(BaseModel):
     browser_local: bool = False
     run_without_docker: bool = False
     browser_headless: bool = False
+    testing_mode: bool = False

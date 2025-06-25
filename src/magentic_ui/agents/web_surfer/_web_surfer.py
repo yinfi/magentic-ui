@@ -347,6 +347,11 @@ class WebSurfer(BaseChatAgent, Component[WebSurferConfig]):
             TOOL_KEYPRESS,
             TOOL_REFRESH_PAGE,
             # TOOL_CLICK_FULL,
+            TOOL_FIND_ELEMENT_BY_CSS,
+            TOOL_FIND_ELEMENT_BY_XPATH,
+            TOOL_WAIT_FOR_ELEMENT_VISIBLE,
+            TOOL_WAIT_FOR_ELEMENT_CLICKABLE,
+            TOOL_TAKE_SCREENSHOT,
         ]
         self.did_lazy_init = False  # flag to check if we have initialized the browser
         self.is_paused = False
@@ -1582,22 +1587,129 @@ class WebSurfer(BaseChatAgent, Component[WebSurferConfig]):
         rects: Dict[str, InteractiveRegion],
         element_id_mapping: Dict[str, str],
     ) -> str:
-        target_id = str(args.get("target_id"))
+        target_id = str(args.get("target_id")) # This is expected to be the numeric __elementId for now
         assert self.downloads_folder is not None
-        file_path = self.downloads_folder + "/" + str(args.get("file_path"))
-        target_name = self._target_name(target_id, rects)
+        file_path = os.path.join(self.downloads_folder, str(args.get("file_path"))) # Use os.path.join for robustness
 
-        target_id = element_id_mapping.get(target_id, target_id)
+        # target_name might not be relevant if target_id is a selector in the future,
+        # but for numeric IDs from rects, it's fine.
+        target_name = self._target_name(target_id, rects) if target_id in rects else target_id
+
+        # element_id_mapping is for the numeric IDs from add_set_of_mark.
+        # If target_id were a selector, this mapping wouldn't apply directly here.
+        actual_target_id = element_id_mapping.get(target_id, target_id)
+
         if target_name:
             action_description = (
-                f"I uploaded the file '{file_path}' to '{target_name}'."
+                f"I uploaded the file '{file_path}' to '{target_name}' (id: {actual_target_id})."
             )
         else:
-            action_description = f"I uploaded the file '{file_path}'."
+            action_description = f"I uploaded the file '{file_path}' to element with id '{actual_target_id}'."
+
         assert self._page is not None
-        await self._playwright_controller.upload_file(self._page, target_id, file_path)
+        # Assuming self._playwright_controller.upload_file still expects the numeric __elementId
+        await self._playwright_controller.upload_file(self._page, actual_target_id, file_path)
 
         return action_description
+
+    async def _execute_tool_find_element_by_css(self, args: Dict[str, Any]) -> str:
+        assert "css_selector" in args
+        css_selector = cast(str, args["css_selector"])
+        action_description = f"Attempting to find element with CSS selector: '{css_selector}'."
+        assert self._page is not None
+
+        element_info = await self._playwright_controller.find_element_by_css(self._page, css_selector)
+
+        if element_info and element_info["found"]:
+            # Convert dict to a readable string, maybe JSON
+            info_str = json.dumps(element_info)
+            return f"Found element: {info_str}"
+        else:
+            return f"Element not found with CSS selector: '{css_selector}'."
+
+    async def _execute_tool_find_element_by_xpath(self, args: Dict[str, Any]) -> str:
+        assert "xpath" in args
+        xpath = cast(str, args["xpath"])
+        action_description = f"Attempting to find element with XPath: '{xpath}'."
+        assert self._page is not None
+
+        element_info = await self._playwright_controller.find_element_by_xpath(self._page, xpath)
+
+        if element_info and element_info["found"]:
+            info_str = json.dumps(element_info)
+            return f"Found element: {info_str}"
+        else:
+            return f"Element not found with XPath: '{xpath}'."
+
+    async def _execute_tool_wait_for_element_visible(self, args: Dict[str, Any]) -> str:
+        selector = cast(str, args["selector"])
+        timeout_seconds = cast(float, args.get("timeout_seconds", 10.0))
+        action_description = f"Waiting for element '{selector}' to be visible for up to {timeout_seconds}s."
+        assert self._page is not None
+
+        success = await self._playwright_controller.wait_for_element_state(
+            self._page, selector, "visible", timeout_seconds
+        )
+
+        if success:
+            return f"Element '{selector}' became visible."
+        else:
+            return f"Timeout: Element '{selector}' did not become visible within {timeout_seconds}s."
+
+    async def _execute_tool_wait_for_element_clickable(self, args: Dict[str, Any]) -> str:
+        selector = cast(str, args["selector"])
+        timeout_seconds = cast(float, args.get("timeout_seconds", 10.0))
+        action_description = f"Waiting for element '{selector}' to be clickable for up to {timeout_seconds}s."
+        assert self._page is not None
+
+        # For an element to be clickable, it must be visible and enabled.
+        # Playwright's 'enabled' state implies it's not disabled.
+        # We'll check for visible first, then enabled.
+        visible_success = await self._playwright_controller.wait_for_element_state(
+            self._page, selector, "visible", timeout_seconds
+        )
+        if not visible_success:
+            return f"Timeout: Element '{selector}' did not become visible (a prerequisite for being clickable) within {timeout_seconds}s."
+
+        enabled_success = await self._playwright_controller.wait_for_element_state(
+            self._page, selector, "enabled", timeout_seconds # Playwright's 'enabled' checks if not disabled
+        )
+
+        if enabled_success: # If it became visible and is enabled
+            return f"Element '{selector}' became clickable (visible and enabled)."
+        else:
+            return f"Timeout: Element '{selector}' was visible but did not become enabled (clickable) within {timeout_seconds}s."
+
+    async def _execute_tool_take_screenshot(self, args: Dict[str, Any]) -> str:
+        filename = cast(str, args["filename"])
+        assert self._page is not None
+
+        # Ensure downloads_folder is set, as it's used as the base path.
+        # If not set, screenshots might not be saved as expected by this tool.
+        # WebSurfer already has self.debug_dir which might be more appropriate.
+        # For consistency with existing screenshot saving in _execute_tool,
+        # let's use self.downloads_folder if available, or self.debug_dir.
+        # The tool description implies it saves to "debug/downloads directory".
+
+        save_dir = self.downloads_folder or self.debug_dir
+        if not save_dir:
+            return "Error: No directory configured for saving screenshots (downloads_folder or debug_dir)."
+
+        # Sanitize filename to prevent directory traversal or invalid characters
+        base_filename = os.path.basename(filename)
+        # Remove potentially problematic characters from filename (simple version)
+        safe_filename = "".join(c for c in base_filename if c.isalnum() or c in ['.', '_', '-']).strip()
+        if not safe_filename:
+            safe_filename = "screenshot.png" # Default if all chars are stripped
+
+        full_path = os.path.join(save_dir, safe_filename)
+
+        try:
+            await self._playwright_controller.get_screenshot(self._page, path=full_path)
+            return f"Screenshot saved to '{full_path}'."
+        except Exception as e:
+            self.logger.error(f"Failed to take screenshot '{full_path}': {e}")
+            return f"Error taking screenshot: {e}"
 
     async def _execute_tool_keypress(self, args: Dict[str, Any]) -> str:
         """Execute the keypress tool to press one or more keyboard keys in sequence.

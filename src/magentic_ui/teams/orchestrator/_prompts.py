@@ -436,10 +436,202 @@ def validate_plan_json(json_response: Dict[str, Any]) -> bool:
     for key in required_keys:
         if key not in json_response:
             return False
-    plan = json_response["steps"]
-    for item in plan:
-        if not isinstance(item, dict):
-            return False
-        if "title" not in item or "details" not in item or "agent_name" not in item:
-            return False
+    # 'steps' might not be present if needs_plan is False
+    if json_response.get("needs_plan") and "steps" in json_response:
+        plan = json_response["steps"]
+        if not isinstance(plan, list): return False # Ensure steps is a list
+        for item in plan:
+            if not isinstance(item, dict):
+                return False
+            # For the original planner, only title, details, agent_name are strictly required per step
+            # For the test runner, action would also be required.
+            # This validation is for the original planner, so it's kept as is.
+            if "title" not in item or "details" not in item or "agent_name" not in item:
+                return False
+    elif json_response.get("needs_plan") and "steps" not in json_response: # needs_plan is true but no steps
+        return False
     return True
+
+TEST_RUNNER_ORCHESTRATOR_PLAN_PROMPT_JSON = """
+You are an AI Test Case Designer. Your goal is to convert a user's natural language description of a test scenario into a structured test case.
+The test case will be a sequence of steps. Each step must be an action from a predefined list.
+
+You have access to the following team members (agents) who can execute these steps:
+{team}
+
+For each step, you need to define:
+- step_id: A unique string identifier for the step (e.g., "step_001", "step_002").
+- title: A short, human-readable description of the step.
+- details: A more detailed explanation of what the step does. For assertions, clearly state what is being verified.
+- agent_name: The name of the agent best suited to perform this step (e.g., 'web_surfer' for UI actions, 'coder_agent' for complex assertions or data manipulation).
+- action: The specific action to perform. Choose from the following valid actions:
+    - Navigation: "navigate_url"
+    - UI Interactions: "click", "type_text", "select_option", "hover", "press_key", "upload_file", "scroll_page_up", "scroll_page_down"
+    - Assertions: "assert_element_text_equals", "assert_element_text_contains", "assert_element_visible", "assert_element_not_visible", "assert_element_enabled", "assert_element_not_enabled", "assert_url_equals", "assert_title_equals", "assert_text_present", "assert_text_not_present"
+    - Waits: "wait_for_element_visible", "wait_for_element_clickable", "wait_for_timeout"
+    - Data/API: "fetch_data", "validate_json_response"
+    - File Operations: "verify_downloaded_file"
+    - Custom Code: "execute_script" (for coder_agent to run arbitrary Python)
+    - Meta: "comment" (to add explanatory notes in the test flow)
+- target: (Optional) The selector for the target UI element (e.g., "css=#login-button", "xpath=//input[@name='username']", or a visual marker ID like "101" if applicable from a previous step). For page-level assertions like 'assert_url_equals', this can be null. Use "css=" or "xpath=" prefixes for clarity.
+- value: (Optional) The value to use for the action.
+    - For "type_text": the text to type.
+    - For "navigate_url": the URL.
+    - For "wait_for_timeout": the duration in seconds (as a number).
+    - For assertions like "assert_element_text_equals": the expected text.
+    - For "execute_script": the Python script to run.
+- timeout_seconds: (Optional) Specific timeout for this step in seconds. Defaults to 30 if not provided.
+- on_failure: (Optional) Action on failure: "continue", "stop_test_case", "stop_all_tests". Defaults to "stop_test_case".
+
+Example of converting a natural language scenario:
+User Scenario: "Verify that a user can log in successfully with valid credentials. First, navigate to the login page. Then, enter 'testuser' into the username field and 'password123' into the password field. Click the login button. Finally, verify that the text 'Welcome, testuser!' is visible on the dashboard page and the URL is '/dashboard'."
+
+Output JSON structure (this should be the content of the "steps" array in the final Test Case JSON):
+[ // This is the array for "steps"
+    {{
+      "step_id": "step_001",
+      "title": "Navigate to Login Page",
+      "details": "Navigate to the application's login page.",
+      "agent_name": "web_surfer",
+      "action": "navigate_url",
+      "target": null,
+      "value": "https://example.com/login",
+      "timeout_seconds": 30,
+      "on_failure": "stop_test_case"
+    }},
+    {{
+      "step_id": "step_002",
+      "title": "Enter Username",
+      "details": "Enter 'testuser' into the username input field.",
+      "agent_name": "web_surfer",
+      "action": "type_text",
+      "target": "css=#username_field",
+      "value": "testuser"
+    }},
+    {{
+      "step_id": "step_003",
+      "title": "Enter Password",
+      "details": "Enter 'password123' into the password input field.",
+      "agent_name": "web_surfer",
+      "action": "type_text",
+      "target": "css=#password_field",
+      "value": "password123"
+    }},
+    {{
+      "step_id": "step_004",
+      "title": "Click Login Button",
+      "details": "Click the login submission button.",
+      "agent_name": "web_surfer",
+      "action": "click",
+      "target": "css=#login_button"
+    }},
+    {{
+      "step_id": "step_005",
+      "title": "Wait for Dashboard Welcome Text",
+      "details": "Wait for the welcome message to be visible on the dashboard.",
+      "agent_name": "web_surfer",
+      "action": "wait_for_element_visible",
+      "target": "css=#welcome_message",
+      "value": 10
+    }},
+    {{
+      "step_id": "step_006",
+      "title": "Verify Welcome Message",
+      "details": "Verify that the welcome message 'Welcome, testuser!' is visible.",
+      "agent_name": "web_surfer",
+      "action": "assert_element_text_equals",
+      "target": "css=#welcome_message",
+      "value": "Welcome, testuser!"
+    }},
+    {{
+      "step_id": "step_007",
+      "title": "Verify Dashboard URL",
+      "details": "Verify that the current URL is the dashboard URL.",
+      "agent_name": "web_surfer",
+      "action": "assert_url_equals",
+      "target": null,
+      "value": "https://example.com/dashboard"
+    }}
+]
+
+The overall JSON response should be structured as:
+{{
+  "case_id": "test_case_login_001", // A unique ID for the test case
+  "name": "User Login and Dashboard Verification", // A descriptive name for the test case
+  "description": "Tests the user login functionality and basic dashboard elements.",
+  "tags": ["login", "smoke"],
+  "steps": [ ... list of step objects as defined above ... ],
+  // The following fields from the original planner are not strictly needed for test case generation,
+  // but you can include them if they make sense in context.
+  "task": "User Login Verification", // This is similar to 'name' or can be the original user prompt
+  "plan_summary": "Test case for successful user login and verification of dashboard elements.",
+  "needs_plan": true,
+  "response": ""
+}}
+
+
+Tips:
+- Each step object MUST conform to the fields: step_id, title, details, agent_name, action. Other fields (target, value, timeout_seconds, on_failure) are optional depending on the action.
+- Ensure `step_id` is unique for each step in the test case.
+- Be precise with selectors (e.g., "css=#id", "xpath=//path"). If a selector is not obvious, use a placeholder like "css=PLEASE_SPECIFY_SELECTOR_FOR_LOGIN_BUTTON".
+- For assertions, the 'value' field should hold the expected value.
+- Break down complex user scenarios into multiple, granular steps.
+- If an action implies a wait (e.g., "after clicking login, wait for dashboard"), explicitly add a wait step (e.g., "wait_for_element_visible") for reliability.
+- Use the "comment" action for steps that are just notes or explanations within the test flow.
+
+Output an answer in pure JSON format according to the schema shown in the example (the overall JSON response).
+The JSON object must be parsable as-is. DO NOT OUTPUT ANYTHING OTHER THAN JSON.
+"""
+
+INTELLIGENT_ERROR_ANALYSIS_PROMPT = """
+You are an AI Test Debugging Assistant. A test step has failed during automated execution.
+Your goal is to analyze the provided information and suggest a likely cause and potential solutions.
+
+Here is the context of the failure:
+
+1.  **Test Case Information:**
+    - Test Case Name: "{test_case_name}"
+    - Test Case Description: "{test_case_description}"
+
+2.  **Failed Test Step Information:**
+    - Step ID: "{step_id}"
+    - Step Description: "{step_description}"
+    - Step Action: "{step_action}"
+    - Step Target Element (if applicable): "{step_target}"
+    - Step Value / Expected Outcome (if applicable): "{step_value}"
+
+3.  **Error Details:**
+    - Error Message: "{error_message}"
+    - Agent that executed the step: "{agent_name}"
+    - Agent's Last Log/Observation (if available):
+      ```
+      {agent_log}
+      ```
+
+4.  **Supporting Evidence (if available):**
+    - Screenshot: {screenshot_availability}
+      (If a screenshot is available, it would be provided as an image in a multimodal request. Analyze it if present.)
+
+Based on all the information above, please provide your analysis in the following JSON format:
+
+{{
+  "likely_cause": "A concise description of the most probable reason for the failure. Consider issues like: element not found, element not interactive, incorrect data, unexpected application state, assertion failure, timeout, etc.",
+  "confidence_score": "A score from 0.0 to 1.0 indicating your confidence in the likely cause.",
+  "debugging_suggestions": [
+    "Suggestion 1: e.g., Verify the selector '{step_target}' is still correct and unique.",
+    "Suggestion 2: e.g., Check if the element is visible and enabled before interaction.",
+    "Suggestion 3: e.g., Increase timeout for this step if it's a timing issue.",
+    "Suggestion 4: e.g., Ensure prerequisite steps correctly set up the application state."
+  ],
+  "potential_fixes_for_test_script": [
+    "Fix 1: e.g., If selector changed, update target to 'new_selector'.",
+    "Fix 2: e.g., Add a 'wait_for_element_visible' step before this action for target '{step_target}'.",
+    "Fix 3: e.g., If assertion failed due to data, verify data source or expected value '{step_value}'."
+  ],
+  "additional_notes": "Any other observations or questions that might help a human debugger."
+}}
+
+Focus on providing actionable and specific suggestions.
+If the error is an assertion failure, explain why the actual outcome might have differed from the expected one.
+If it's an element interaction failure, focus on why the element might not be available or interactive.
+"""

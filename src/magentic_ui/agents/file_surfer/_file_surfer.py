@@ -568,6 +568,88 @@ class FileSurfer(BaseChatAgent, Component[FileSurferConfig]):
     async def on_reset(self, cancellation_token: CancellationToken) -> None:
         """Reset the FileSurfer agent's state."""
         self._chat_history.clear()
+        # Also reset approved files if necessary, or handle through a new session
+        self._approved_files.clear()
+
+
+    async def _execute_code_for_file_op(self, script_content: str, file_path: str) -> str:
+        """
+        Helper to execute a script using the agent's code executor.
+        The script is expected to print its result as a JSON string to stdout.
+        """
+        # Ensure the file path is absolute for the executor context, usually within its work_dir
+        # The code_executor's work_dir is the base for relative paths in scripts.
+        # If file_path is already absolute and within the bind_dir, it might work directly.
+        # For simplicity, assuming file_path is relative to the work_dir or an accessible absolute path.
+
+        code_block = f"""
+import json
+import csv
+import os
+
+file_to_read = r'''{file_path}''' # Use raw string for paths
+
+try:
+    # Ensure the path is treated as relative to the executor's working directory
+    # if not os.path.isabs(file_to_read):
+    #     # This part might be complex depending on how code_executor resolves paths
+    #     # For DockerCommandLineCodeExecutor, work_dir is the cwd inside container
+    #     # Assuming file_path is either absolute (and mounted) or relative to work_dir
+    #     pass
+
+{script_content}
+
+except FileNotFoundError:
+    print(json.dumps({{"error": "File not found.", "path": file_to_read}}))
+except Exception as e:
+    print(json.dumps({{"error": str(e), "path": file_to_read}}))
+        """
+
+        # Using a unique filename for the temporary script
+        script_filename = f"temp_file_op_{uuid.uuid4()}.py"
+
+        # For Docker, paths in code_block need to be paths *inside* the container.
+        # FileSurfer's work_dir is typically /workspace.
+        # If 'path' arg to tools is host path, it needs to be mapped to container path.
+        # This is complex. For now, assume 'path' is a path the executor can directly access.
+
+        code_result = await self._code_executor.execute_code_blocks(
+            code_blocks=[{"code": code_block, "language": "python", "filename": script_filename}],
+            cancellation_token=CancellationToken() # Use a new token for this specific execution
+        )
+
+        if code_result.exit_code != 0:
+            return json.dumps({"error": f"Script execution failed with exit code {code_result.exit_code}", "details": code_result.output})
+
+        # The script prints JSON, so the output should be that JSON string.
+        # No further JSON parsing needed here if script directly prints JSON.
+        return code_result.output.strip()
+
+
+    async def _execute_tool_read_csv_file(self, args: Dict[str, Any]) -> str:
+        path = str(args["path"])
+        self._approved_files.add(path) # Mark as approved if execution proceeds
+
+        script_content = f"""
+    data = []
+    with open(file_to_read, mode='r', newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            data.append(row)
+    print(json.dumps(data))
+        """
+        return await self._execute_code_for_file_op(script_content, path)
+
+    async def _execute_tool_read_json_file(self, args: Dict[str, Any]) -> str:
+        path = str(args["path"])
+        self._approved_files.add(path)
+
+        script_content = f"""
+    with open(file_to_read, mode='r', encoding='utf-8') as jsonfile:
+        data = json.load(jsonfile)
+    print(json.dumps(data))
+        """
+        return await self._execute_code_for_file_op(script_content, path)
 
     def _get_browser_state(self) -> Tuple[str, str]:
         """Get the current state of the browser.
